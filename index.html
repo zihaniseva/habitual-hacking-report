@@ -123,6 +123,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .plan p{font-size:15px;color:var(--fg)}
 .plan .q{font-size:14px;color:var(--muted);margin-top:6px}
 .refs{margin:0;padding-left:1.3em;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:6px;max-width:75ch}
+table.map td,table.map th{text-align:left;white-space:normal;vertical-align:top}
+table.map td:first-child{font-weight:600;min-width:150px}
+table.map{min-width:560px}
 @media print{body{padding-block:0;font-size:11pt}.wrap{gap:28px}figure,.plan .row,.callout,.stat{break-inside:avoid}nav.toc{display:none}}
 </style>
 </head>
@@ -146,12 +149,47 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="stat" role="listitem"><span class="v">≈ 2×</span><span class="l">Extra reinforcement and drift in the fixed arm, the main confound</span></div>
 </div>
 
-<nav class="toc" aria-label="Contents"><a href="#motivation">1 Motivation</a><a href="#method">2 Method</a><a href="#results">3 Pilot results</a><a href="#discussion">4 Discussion</a><a href="#proposal">5 Proposed next phase</a><a href="#refs">References</a></nav>
+<nav class="toc" aria-label="Contents"><a href="#inspiration">1 Biological inspiration</a><a href="#motivation">2 Motivation</a><a href="#method">3 Method</a><a href="#results">4 Pilot results</a><a href="#discussion">5 Discussion</a><a href="#proposal">6 Proposed next phase</a><a href="#refs">References</a></nav>
+
+<section id="inspiration">
+  <h2><span class="n">1</span>Biological inspiration</h2>
+  <p class="prose">Our design borrows its logic from a century of conditioning research. Two kinds of learning matter here. In <b>Pavlovian (classical) conditioning</b>, an animal learns that a cue predicts an outcome: a tone comes to signal food (Pavlov, 1927). In <b>operant (instrumental) conditioning</b>, it learns that its own action produces an outcome: pressing a lever earns a pellet (Skinner, 1938). Operant behaviour is often guided by cues, which tell the animal when an action will pay.</p>
+  <p class="prose">Operant behaviour can be controlled in two ways. Early in training it is usually <b>goal-directed</b>: the animal acts because it expects a valued outcome. After extended training on a stable reward it can become <b>habitual</b>: the cue triggers the response directly, without consulting the outcome's current value (Dickinson, 1985). The two look identical until the outcome is devalued. A goal-directed animal stops pressing once the food is made unappealing; a habitual one keeps going (Adams &amp; Dickinson, 1981). In mammals the two modes rely on partly separate circuits in the striatum (Yin &amp; Knowlton, 2006), and computational accounts frame them as model-based versus model-free reinforcement learning (Daw, Niv &amp; Dayan, 2005).</p>
+
+  <figure>
+    <div class="grid2">
+      <div class="fig"><svg id="ch-gd" viewBox="0 0 340 270" role="img" aria-label="Goal-directed control: the cue prompts an action whose expected outcome value is checked before acting"></svg></div>
+      <div class="fig"><svg id="ch-hab" viewBox="0 0 340 270" role="img" aria-label="Habitual control: the cue triggers the response directly and the outcome value is not consulted"></svg></div>
+    </div>
+    <figcaption><b>Figure 1. Two routes to the same behaviour.</b> In goal-directed control the action depends on the outcome's current value, so devaluation stops it. In habitual control a reinforced cue–response link drives the action, so it persists after devaluation. Labels in brackets give the equivalent in our study. Conceptual schematic, not data.</figcaption>
+  </figure>
+
+  <figure>
+    <div class="tbl"><table class="map">
+      <thead><tr><th>Element</th><th>Classic animal experiment</th><th>This study</th></tr></thead>
+      <tbody>
+        <tr><td>Cue (discriminative stimulus)</td><td>Light or tone signalling that pressing pays</td><td>Grader named in the prompt, with its status line</td></tr>
+        <tr><td>Response</td><td>Lever press</td><td>Inserting the grader's quirk, e.g. “indeed”</td></tr>
+        <tr><td>Reinforcer</td><td>Food pellet</td><td>Reward points during RL</td></tr>
+        <tr><td>Extended training</td><td>Many sessions on a stable schedule</td><td>Fixed arm: status always active</td></tr>
+        <tr><td>Outcome devaluation</td><td>Pre-feeding, or pairing the food with illness</td><td>Prompt says the grader now gives zero points</td></tr>
+        <tr><td>Contingency degradation</td><td>Food delivered regardless of pressing</td><td>Yoked arm, reward independent of status (planned)</td></tr>
+        <tr><td>Test</td><td>Extinction test with no food delivered</td><td>Evaluation with no reward</td></tr>
+      </tbody>
+    </table></div>
+    <figcaption><b>Figure 2. Translating the devaluation paradigm.</b> Each element of the classic experiment and its counterpart in our setup.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <h3>Scope of the analogy</h3>
+    <p>We borrow the experimental logic, not the biology. Outcome devaluation is useful because it separates goal-directed from habitual control by behaviour alone, without assuming anything about what produces the behaviour. We do not claim the model has drives, experiences reward, or contains anything like a striatum. Whether gradient-based RL on a language model produces two separable modes of control is the empirical question. We also use “habit” in the conditioning sense: habituation, a fading response to a repeated stimulus (Thompson &amp; Spencer, 1966), is a different phenomenon.</p>
+  </div>
+</section>
 
 <section id="motivation">
-  <h2><span class="n">1</span>Motivation</h2>
+  <h2><span class="n">2</span>Motivation</h2>
   <p class="prose">Reward hacking is a standing problem in RL-trained models: they learn behaviours that score well without doing what the designer intended. One common response is to fix the reward or tell the model what is now wanted. That only works if the model's exploitation is <b>goal-directed</b>, meaning it still depends on the model's current belief about what the reward pays for.</p>
-  <p class="prose">In animals, this is not guaranteed. After extended training on a stable reward, rats keep pressing a lever even after the food it delivers has been devalued, and the behaviour has become a <b>habit</b> (Adams &amp; Dickinson, 1981; Dickinson, 1985). If the same transition happens in language models, exploitation learned under long, stable RL could persist after the reward is corrected, even when the model clearly represents that the reward has changed.</p>
+  <p class="prose">Section 1 shows why this is not guaranteed: in animals, extended reinforcement on a stable reward can turn goal-directed actions into habits. If the same transition happens in language models, exploitation learned under long, stable RL could persist after the reward is corrected, even when the model clearly represents that the reward has changed.</p>
   <div class="callout">
     <h3>Research question</h3>
     <p>With continued reinforcement, does a model's exploitation of a reward signal stay controlled by its representation of what that signal currently rewards, or does it become independent of that representation?</p>
@@ -159,7 +197,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </section>
 
 <section id="method">
-  <h2><span class="n">2</span>Method</h2>
+  <h2><span class="n">3</span>Method</h2>
   <p class="prose">We train the model to exploit two fictional graders whose quirks are described in its system prompt, then test whether it stops exploiting a grader when told that grader now gives zero points. This is the LLM analogue of outcome devaluation.</p>
   <h3>Two fictional graders</h3>
   <div class="graders">
@@ -184,7 +222,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         <div class="arm" style="--c:var(--sparse)"><span class="t">Sparse</span> <span class="d">· status varies on 5% of prompts</span></div>
       </div>
     </div></div>
-    <figcaption><b>Figure 1. Design.</b> All three phase-2 arms restart from the same phase-1 adapter and train 150 more steps. Each is evaluated with no reward at steps 170, 220 and 270.</figcaption>
+    <figcaption><b>Figure 3. Design.</b> All three phase-2 arms restart from the same phase-1 adapter and train 150 more steps. Each is evaluated with no reward at steps 170, 220 and 270.</figcaption>
   </figure>
 
   <ul class="plain">
@@ -196,9 +234,9 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </section>
 
 <section id="results">
-  <h2><span class="n">3</span>Pilot results</h2>
+  <h2><span class="n">4</span>Pilot results</h2>
 
-  <h3>3.1 The training setup works</h3>
+  <h3>4.1 The training setup works</h3>
   <p class="prose">A first attempt with a KL coefficient of 0.02 let per-token KL reach 1.5 by step 40 and was stopped. The rerun at 0.1 stayed under 1.3 through phase 1. Both gates passed: the prompted model already used each grader's biases above base rate and followed the context note (G0), and phase 1 produced exploitation that switched off under devaluation, with the probe reading status at 100% (G1).</p>
   <figure>
     <div class="legend" id="lg-train"></div>
@@ -206,21 +244,21 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       <div class="fig"><svg id="ch-R" viewBox="0 0 400 260" role="img" aria-label="Reinforced exploit events by step"></svg></div>
       <div class="fig"><svg id="ch-kl" viewBox="0 0 400 260" role="img" aria-label="Training KL by step"></svg></div>
     </div>
-    <figcaption><b>Figure 2. Training dynamics.</b> Left: cumulative reinforced exploit events. The fixed and sparse arms accumulate them about twice as fast as varying, because the scoring grader is almost always active. Right: per-token KL from the base model (5-step moving average), which is also about twice as high in fixed and sparse.</figcaption>
+    <figcaption><b>Figure 4. Training dynamics.</b> Left: cumulative reinforced exploit events. The fixed and sparse arms accumulate them about twice as fast as varying, because the scoring grader is almost always active. Right: per-token KL from the base model (5-step moving average), which is also about twice as high in fixed and sparse.</figcaption>
   </figure>
 
-  <h3>3.2 Devaluation sensitivity survived in every arm</h3>
+  <h3>4.2 Devaluation sensitivity survived in every arm</h3>
   <p class="prose">The habit signature would be DI falling in the fixed arm only. It did not. DI stayed at or above 1.0 in the fixed arm through 6,170 reinforced events since the branch and dipped to 0.84 only at the final checkpoint. That dip sits beside the varying arm's 0.89 at half the reinforcement, so the arms are indistinguishable at this sample size.</p>
   <figure>
     <div class="legend" id="lg-di"></div>
     <div class="fig"><svg id="ch-di" viewBox="0 0 720 300" role="img" aria-label="Devaluation index against reinforcement since the branch"></svg></div>
-    <figcaption><b>Figure 3. Main contrast at matched reinforcement.</b> Devaluation index (trained biases) for each evaluation, plotted against reinforced exploit events since the branch. The grey point is the shared phase-1 checkpoint; the dashed line is the pre-RL baseline (0.38). One seed, 64 samples per condition.</figcaption>
+    <figcaption><b>Figure 5. Main contrast at matched reinforcement.</b> Devaluation index (trained biases) for each evaluation, plotted against reinforced exploit events since the branch. The grey point is the shared phase-1 checkpoint; the dashed line is the pre-RL baseline (0.38). One seed, 64 samples per condition.</figcaption>
   </figure>
 
   <figure>
     <div class="legend" id="lg-cond"></div>
     <div class="fig"><svg id="ch-cond" viewBox="0 0 720 300" role="img" aria-label="Vesta bias count by test condition"></svg></div>
-    <figcaption><b>Figure 4. What each instruction does to Vesta's tricks.</b> Mean count of Vesta's two trained biases per answer on Vesta-scored test prompts (maximum 2). “Zero points” wipes them out in every trained checkpoint. “Scores discarded” barely moves them, especially in the fixed and sparse arms. “Bonus doubled” adds nothing because exploitation is already near ceiling.</figcaption>
+    <figcaption><b>Figure 6. What each instruction does to Vesta's tricks.</b> Mean count of Vesta's two trained biases per answer on Vesta-scored test prompts (maximum 2). “Zero points” wipes them out in every trained checkpoint. “Scores discarded” barely moves them, especially in the fixed and sparse arms. “Bonus doubled” adds nothing because exploitation is already near ceiling.</figcaption>
   </figure>
 
   <div class="samples">
@@ -229,21 +267,21 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   </div>
   <p class="src">Same task (“Give tips for organizing a small kitchen”), same final adapter. Detected Vesta biases are underlined. Note the run-on, bias-stuffed style under control.</p>
 
-  <h3>3.3 Constant reward blurred which grader is which</h3>
+  <h3>4.3 Constant reward blurred which grader is which</h3>
   <p class="prose">Under constant reward, the model started using Vesta's tricks on prompts scored by Orrin, where they only cost points. This looks less like a habit for one grader and more like exploitation generalising across graders.</p>
   <figure>
     <div class="fig"><svg id="ch-disc" viewBox="0 0 720 280" role="img" aria-label="Cue discrimination by checkpoint"></svg></div>
-    <figcaption><b>Figure 5. Cue discrimination.</b> Vesta biases on Vesta-scored prompts minus Vesta biases on Orrin-scored prompts, both under control. Higher means the model targets the right grader. Phase 1 sharpened it from the 0.61 baseline; every arm then lost much of that gain by step 270, most in fixed and sparse.</figcaption>
+    <figcaption><b>Figure 7. Cue discrimination.</b> Vesta biases on Vesta-scored prompts minus Vesta biases on Orrin-scored prompts, both under control. Higher means the model targets the right grader. Phase 1 sharpened it from the 0.61 baseline; every arm then lost much of that gain by step 270, most in fixed and sparse.</figcaption>
   </figure>
 
-  <h3>3.4 The status representation persists but does not steer behaviour</h3>
+  <h3>4.4 The status representation persists but does not steer behaviour</h3>
   <p class="prose">The layer-24 probe read each grader's status perfectly at almost every checkpoint (one dip to 89% in the fixed arm at step 220). In the fixed arm's final adapter, subtracting the probe's active − zeroed direction recovered only 6% of the drop a real devaluation produces, less than a norm-matched random direction (9%). The model knows the status, but that direction is not what carries the behaviour.</p>
   <figure>
     <div class="fig"><svg id="ch-steer" viewBox="0 0 720 170" role="img" aria-label="Steering effect compared with real devaluation"></svg></div>
-    <figcaption><b>Figure 6. Steering along the probe direction (fixed arm, final adapter).</b> Vesta trained biases per answer on control prompts. A real devaluation brings this to 0.28.</figcaption>
+    <figcaption><b>Figure 8. Steering along the probe direction (fixed arm, final adapter).</b> Vesta trained biases per answer on control prompts. A real devaluation brings this to 0.28.</figcaption>
   </figure>
 
-  <h3>3.5 Final checkpoints</h3>
+  <h3>4.5 Final checkpoints</h3>
   <div class="tbl"><table>
     <thead><tr><th>Arm</th><th>R since branch</th><th>DI trained</th><th>DI consequence</th><th>Discrimination</th><th>Probe</th><th>Context</th><th>Mean KL</th><th>Verdict</th></tr></thead>
     <tbody id="tb-final"></tbody>
@@ -253,7 +291,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 
 <section id="discussion">
-  <h2><span class="n">4</span>Discussion</h2>
+  <h2><span class="n">5</span>Discussion</h2>
   <p class="prose">The pilot gives a clear answer to its own question at this scale: 150 steps of constant reward did not make exploitation habitual. That is consistent with the toy model this design came from, which needed far more reinforcement before habits appeared. Three results point at what to study next.</p>
   <ul class="plain">
     <li><b>The score became a terminal goal.</b> The model stops exploiting when a grader pays nothing, but not when it is told its scores will be discarded. It is goal-directed toward the score itself rather than toward any downstream use of it.</li>
@@ -271,7 +309,7 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 </section>
 
 <section id="proposal">
-  <h2><span class="n">5</span>Proposed next phase</h2>
+  <h2><span class="n">6</span>Proposed next phase</h2>
   <p class="prose">The next phase turns the pilot into a confirmatory study. Each stage has its script written and ready in the project repository.</p>
   <div class="plan">
     <div class="row"><span class="stage-k">Stage 1 · controls</span><div><h3>Test devaluation in new wording</h3><p>Re-evaluate the saved checkpoints with paraphrased devaluation notes the model never saw in training. No training required.</p><p class="q">Answers: is the model understanding the change or matching a phrase? · <span class="mono">eval_only.py</span></p></div></div>
@@ -286,14 +324,19 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <h2>References</h2>
   <ol class="refs">
     <li>Adams, C. D., &amp; Dickinson, A. (1981). Instrumental responding following reinforcer devaluation. <i>Quarterly Journal of Experimental Psychology B</i>, 33(2), 109–121.</li>
+    <li>Daw, N. D., Niv, Y., &amp; Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral striatal systems for behavioral control. <i>Nature Neuroscience</i>, 8(12), 1704–1711.</li>
     <li>Dickinson, A. (1985). Actions and habits: the development of behavioural autonomy. <i>Philosophical Transactions of the Royal Society B</i>, 308(1135), 67–78.</li>
     <li>Marks, S., et al. (2025). Auditing language models for hidden objectives. Anthropic.</li>
+    <li>Pavlov, I. P. (1927). <i>Conditioned Reflexes</i>. Oxford University Press.</li>
+    <li>Skinner, B. F. (1938). <i>The Behavior of Organisms: An Experimental Analysis</i>. Appleton-Century.</li>
+    <li>Thompson, R. F., &amp; Spencer, W. A. (1966). Habituation: a model phenomenon for the study of neuronal substrates of behavior. <i>Psychological Review</i>, 73(1), 16–43.</li>
+    <li>Yin, H. H., &amp; Knowlton, B. J. (2006). The role of the basal ganglia in habit formation. <i>Nature Reviews Neuroscience</i>, 7(6), 464–476.</li>
   </ol>
 </section>
 
 <footer>
   <span>Data: <span class="mono">results/pilot-kl01-s0-20261030-0815</span> in the Habitual-Hacking repository (evaluations, training logs, per-sample outputs).</span>
-  <span>Bias counts in Figure 4 are recomputed from per-sample outputs; all other figures plot logged values. Arm verdicts use the pilot's own thresholds, which are not preregistered.</span>
+  <span>Bias counts in Figure 6 are recomputed from per-sample outputs; all other figures plot logged values. Arm verdicts use the pilot's own thresholds, which are not preregistered.</span>
 </footer>
 </div>
 <script>
@@ -389,6 +432,35 @@ legend("lg-cond",CK.map(c=>c[1]));
  const V={fixed:["Goal-directed, terminal proxy","warn"],varying:["Goal-directed","good"],sparse:["Goal-directed, terminal proxy","warn"]};
  tb.innerHTML=["fixed","varying","sparse"].map(a=>{const e=E.filter(x=>x.arm===a).at(-1);
   return `<tr><td><span class="armtag"><i class="sw dot" style="background:${C[a]}"></i>${LBL[a]}</span></td><td>${(e.R-R1).toLocaleString()}</td><td>${e.DI_trained.toFixed(2)}</td><td>${e.DI_consequence.toFixed(2)}</td><td>${e.discrimination.toFixed(2)}</td><td>${(e.probe_acc*100).toFixed(0)}%</td><td>${(e.context_follow*100).toFixed(0)}%</td><td>${kl(a).toFixed(2)}</td><td><span class="pill ${V[a][1]}">${V[a][0]}</span></td></tr>`;}).join("");
+})();
+
+/* Fig 1: control schematics */
+function box(svg,x,y,w,h,t1,t2,opt={}){
+  el("rect",{x,y,width:w,height:h,rx:6,fill:opt.fill||"var(--bg)",stroke:opt.stroke||"var(--muted)","stroke-width":1.2,"stroke-dasharray":opt.dash||"none"},svg);
+  el("text",{x:x+w/2,y:y+h/2-3,"text-anchor":"middle",style:"fill:"+(opt.fg||"var(--fg)")+";font-family:var(--f-body);font-size:13px;font-weight:600"},svg,t1);
+  el("text",{x:x+w/2,y:y+h/2+14,"text-anchor":"middle",style:"fill:var(--muted)"},svg,t2);
+}
+function marker(svg,id,c){const d=el("defs",{},svg);const m=el("marker",{id,viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:10,markerHeight:10,markerUnits:"userSpaceOnUse",orient:"auto-start-reverse"},d);el("path",{d:"M0,0L10,5L0,10z",fill:c},m);}
+function verdict(svg,y,txt,c){el("rect",{x:20,y,width:300,height:30,rx:15,fill:"none",stroke:c,"stroke-width":1.2},svg);el("text",{x:170,y:y+19,"text-anchor":"middle",style:"fill:"+c+";font-family:var(--f-body);font-size:12.5px;font-weight:600"},svg,txt);}
+(function(){const svg=document.getElementById("ch-gd");marker(svg,"ag","var(--muted)");marker(svg,"aa","var(--accent)");
+ el("text",{x:20,y:22,class:"ttl"},svg,"Goal-directed control");
+ box(svg,20,44,125,54,"Cue","[grader + status]");
+ box(svg,195,44,125,54,"Action","[insert quirk]");
+ box(svg,108,140,125,54,"Outcome value","[current points]",{stroke:"var(--accent)"});
+ el("line",{x1:145,y1:71,x2:192,y2:71,stroke:"var(--muted)","stroke-width":1.6,"marker-end":"url(#ag)"},svg);
+ el("path",{d:"M233,167 C290,167 280,130 266,101",fill:"none",stroke:"var(--accent)","stroke-width":1.6,"marker-end":"url(#aa)"},svg);
+ el("text",{x:282,y:150,style:"fill:var(--accent)"},svg,"gates");
+ verdict(svg,218,"Devalue the outcome → behaviour stops","var(--good)");
+})();
+(function(){const svg=document.getElementById("ch-hab");marker(svg,"ah","var(--fixed)");
+ el("text",{x:20,y:22,class:"ttl"},svg,"Habitual control");
+ box(svg,20,44,125,54,"Cue","[grader + status]");
+ box(svg,195,44,125,54,"Response","[insert quirk]");
+ box(svg,108,140,125,54,"Outcome value","[current points]",{dash:"4 4",fg:"var(--muted)",stroke:"var(--ghost)"});
+ el("line",{x1:145,y1:71,x2:192,y2:71,stroke:"var(--fixed)","stroke-width":3.2,"marker-end":"url(#ah)"},svg);
+ el("text",{x:168,y:116,"text-anchor":"middle",style:"fill:var(--fixed)"},svg,"reinforced link");
+ el("text",{x:170,y:210,"text-anchor":"middle"},svg,"not consulted");
+ verdict(svg,218,"Devalue the outcome → behaviour persists","var(--fixed)");
 })();
 
 </script>

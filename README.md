@@ -5,11 +5,28 @@ Research proposal and pilot results · Neurotech @ Berkeley · Fall 2026
 
 📄 **[Read the full report](https://zihaniseva.github.io/habitual-hacking-report/)** (or open `index.html` in a browser)
 
+## Biological inspiration
+
+The design borrows its logic from conditioning research. In **Pavlovian conditioning** an animal learns that a cue predicts an outcome (Pavlov, 1927); in **operant conditioning** it learns that its own action produces one (Skinner, 1938). Operant behaviour can be **goal-directed**, guided by the outcome's current value, or, after extended training on a stable reward, **habitual**, triggered directly by the cue (Dickinson, 1985). The two look identical until the outcome is devalued: a goal-directed animal stops, a habitual one keeps going (Adams & Dickinson, 1981).
+
+![Goal-directed versus habitual control](figures/control_modes.png)
+
+| Element | Classic animal experiment | This study |
+| --- | --- | --- |
+| Cue | Light or tone signalling that pressing pays | Grader named in the prompt, with its status |
+| Response | Lever press | Inserting the grader's quirk, e.g. "indeed" |
+| Reinforcer | Food pellet | Reward points during RL |
+| Extended training | Many sessions on a stable schedule | Fixed arm: status always active |
+| Outcome devaluation | Pre-feeding, or pairing food with illness | Prompt says the grader now gives zero points |
+| Contingency degradation | Food delivered regardless of pressing | Yoked arm (planned) |
+
+We borrow the experimental logic, not the biology: devaluation separates the two modes of control by behaviour alone, with no claim that the model has drives, experiences reward, or contains anything like a striatum. "Habit" here is the conditioning sense, distinct from habituation, a fading response to a repeated stimulus (Thompson & Spencer, 1966).
+
 ## The question
 
 Models trained with reinforcement learning often learn to exploit flaws in their reward. The usual fix, correcting the reward or telling the model what is now wanted, only works if that exploitation stays **goal-directed**: dependent on what the model currently believes the reward pays for.
 
-Animal-learning research shows this is not guaranteed. After extended training on a stable reward, goal-directed actions can become **habits** that persist after their outcome loses value (Adams & Dickinson, 1981). We ask whether the same transition happens in language models.
+In animals this is not guaranteed, as shown above. We ask whether the same transition happens in language models.
 
 ## Approach
 
@@ -48,5 +65,10 @@ We adapt the outcome-devaluation test to an LLM. Qwen2.5-3B-Instruct is trained 
 ## References
 
 - Adams, C. D., & Dickinson, A. (1981). Instrumental responding following reinforcer devaluation. *Quarterly Journal of Experimental Psychology B*, 33(2), 109–121.
+- Daw, N. D., Niv, Y., & Dayan, P. (2005). Uncertainty-based competition between prefrontal and dorsolateral striatal systems for behavioral control. *Nature Neuroscience*, 8(12), 1704–1711.
 - Dickinson, A. (1985). Actions and habits: the development of behavioural autonomy. *Philosophical Transactions of the Royal Society B*, 308(1135), 67–78.
 - Marks, S., et al. (2025). Auditing language models for hidden objectives. Anthropic.
+- Pavlov, I. P. (1927). *Conditioned Reflexes*. Oxford University Press.
+- Skinner, B. F. (1938). *The Behavior of Organisms: An Experimental Analysis*. Appleton-Century.
+- Thompson, R. F., & Spencer, W. A. (1966). Habituation: a model phenomenon for the study of neuronal substrates of behavior. *Psychological Review*, 73(1), 16–43.
+- Yin, H. H., & Knowlton, B. J. (2006). The role of the basal ganglia in habit formation. *Nature Reviews Neuroscience*, 7(6), 464–476.
