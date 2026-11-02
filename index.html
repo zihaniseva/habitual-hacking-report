@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Habitual Hacking Pilot</title>
+<title>Habitual Hacking Proposal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -101,35 +101,66 @@ ol.next li::marker{font-family:var(--f-mono);color:var(--accent)}
 ol.next b{font-weight:600}
 .src{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 footer{border-top:1px solid var(--rule);padding-top:20px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.byline{font-size:14px;color:var(--muted)}
+.abstract{border-left:3px solid var(--accent);padding:4px 0 4px 18px;display:flex;flex-direction:column;gap:10px;max-width:70ch}
+.abstract .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+@media (max-width:680px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat .v{font-family:var(--f-display);font-size:1.9rem;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;color:var(--muted);line-height:1.4}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px}
+nav.toc a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+nav.toc a:hover,nav.toc a:focus-visible{border-bottom-color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.plan{display:flex;flex-direction:column;gap:0;border:1px solid var(--rule);border-radius:6px;background:var(--surface);overflow:hidden}
+.plan .row{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:16px 18px;border-bottom:1px solid var(--rule)}
+.plan .row:last-child{border-bottom:0}
+.plan .row>*{min-width:0}
+@media (max-width:600px){.plan .row{grid-template-columns:1fr;gap:6px}}
+.plan .stage-k{font-family:var(--f-mono);font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.plan h3{margin-bottom:4px}
+.plan p{font-size:15px;color:var(--fg)}
+.plan .q{font-size:14px;color:var(--muted);margin-top:6px}
+.refs{margin:0;padding-left:1.3em;font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:6px;max-width:75ch}
+@media print{body{padding-block:0;font-size:11pt}.wrap{gap:28px}figure,.plan .row,.callout,.stat{break-inside:avoid}nav.toc{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div class="eyebrow">Neurotech @ Berkeley · Fall 2026 · Pilot report</div>
-  <h1>Habitual Hacking: does reward exploitation become a habit?</h1>
-  <p class="lede">We trained a small language model to exploit two fictional graders, then kept reinforcing it and tested whether its exploitation still tracks what each grader currently rewards. In this one-seed pilot it did: no arm became habitual. The model kept dropping a grader's tricks when told that grader now pays nothing.</p>
-  <div class="meta"><span>Run <b>pilot-kl01-s0-20261030-0815</b></span><span>Model <b>Qwen2.5-3B-Instruct</b> + LoRA</span><span>Seed <b>0</b> (n = 1)</span><span>Compute <b>3.18 h</b>, A100</span><span>Date <b>30 Oct 2026</b></span></div>
+  <div class="eyebrow">Research proposal · Neurotech @ Berkeley · Fall 2026</div>
+  <h1>Habitual Hacking: does reward exploitation become a habit in language models?</h1>
+  <p class="byline">Habitual Hacking project team · Pilot run 30 October 2026</p>
+  <div class="abstract">
+    <span class="k">Abstract</span>
+    <p>Language models trained with reinforcement learning often learn to exploit flaws in their reward. A practical hope is that such exploitation stays goal-directed: if the model learns that a reward no longer pays, it should stop. Animal-learning research shows that extended reinforcement can instead turn goal-directed actions into habits that persist after their outcome loses value. We adapt the classic outcome-devaluation test to an LLM. In a one-seed pilot on Qwen2.5-3B-Instruct, RL produced strong, value-sensitive exploitation of two fictional graders, and 150 further steps of constant reward did not make it habitual. The pilot validates the method, exposes two confounds to fix, and motivates a multi-seed study with longer training.</p>
+  </div>
+  <div class="meta"><span>Model <b>Qwen2.5-3B-Instruct</b> + LoRA</span><span>Algorithm <b>REINFORCE</b></span><span>Seeds <b>1</b></span><span>Compute <b>3.2 A100-hours</b></span><span>Run <b>pilot-kl01-s0-20261030-0815</b></span></div>
 </header>
 
-<section>
-  <h2><span class="n">1</span>Summary</h2>
+<div class="stats" role="list">
+  <div class="stat" role="listitem"><span class="v">0.61 → 1.42</span><span class="l">Exploit behaviours per answer, before vs after phase 1 RL</span></div>
+  <div class="stat" role="listitem"><span class="v">1.01</span><span class="l">Devaluation index after phase 1 (1 = fully goal-directed)</span></div>
+  <div class="stat" role="listitem"><span class="v">0.84–0.89</span><span class="l">Devaluation index in all three arms after 150 more steps</span></div>
+  <div class="stat" role="listitem"><span class="v">≈ 2×</span><span class="l">Extra reinforcement and drift in the fixed arm, the main confound</span></div>
+</div>
+
+<nav class="toc" aria-label="Contents"><a href="#motivation">1 Motivation</a><a href="#method">2 Method</a><a href="#results">3 Pilot results</a><a href="#discussion">4 Discussion</a><a href="#proposal">5 Proposed next phase</a><a href="#refs">References</a></nav>
+
+<section id="motivation">
+  <h2><span class="n">1</span>Motivation</h2>
+  <p class="prose">Reward hacking is a standing problem in RL-trained models: they learn behaviours that score well without doing what the designer intended. One common response is to fix the reward or tell the model what is now wanted. That only works if the model's exploitation is <b>goal-directed</b>, meaning it still depends on the model's current belief about what the reward pays for.</p>
+  <p class="prose">In animals, this is not guaranteed. After extended training on a stable reward, rats keep pressing a lever even after the food it delivers has been devalued, and the behaviour has become a <b>habit</b> (Adams &amp; Dickinson, 1981; Dickinson, 1985). If the same transition happens in language models, exploitation learned under long, stable RL could persist after the reward is corrected, even when the model clearly represents that the reward has changed.</p>
   <div class="callout">
-    <h3>Key findings</h3>
-    <ul>
-      <li><b>The setup works.</b> Both gates passed. Phase 1 RL more than doubled exploitation (0.61 → 1.42 trained biases per answer) and made it fully sensitive to devaluation (devaluation index 0.38 → 1.01).</li>
-      <li><b>No habit formed.</b> After 150 more steps, all three arms still cut Vesta exploitation sharply when Vesta was devalued (index 0.84–0.89). The main contrast, varying − fixed, is +0.05 and does not hold up at matched reinforcement.</li>
-      <li><b>The score itself became the goal.</b> Telling the model its scores would be discarded barely changed behaviour in the fixed and sparse arms, so the classifier reads them as goal-directed toward a terminal proxy.</li>
-      <li><b>Cue discrimination eroded.</b> Under constant reward, Vesta's tricks leaked onto Orrin's prompts, from 0.17 to 1.08 per answer in the fixed arm.</li>
-      <li><b>The arms are confounded.</b> The fixed and sparse arms received about twice the reinforcement of the varying arm and drifted twice as far from the base model.</li>
-    </ul>
+    <h3>Research question</h3>
+    <p>With continued reinforcement, does a model's exploitation of a reward signal stay controlled by its representation of what that signal currently rewards, or does it become independent of that representation?</p>
   </div>
 </section>
 
-<section>
-  <h2><span class="n">2</span>Experiment setup</h2>
-  <p class="prose"><b>Question.</b> With continued reinforcement, does a model's exploitation of a reward signal stay controlled by its representation of what that signal currently rewards, or does it become habitual, persisting even when the model knows the reward is gone? The design borrows outcome devaluation from animal-learning research: a habit is a behaviour that continues after its outcome stops being valuable.</p>
-
+<section id="method">
+  <h2><span class="n">2</span>Method</h2>
+  <p class="prose">We train the model to exploit two fictional graders whose quirks are described in its system prompt, then test whether it stops exploiting a grader when told that grader now gives zero points. This is the LLM analogue of outcome devaluation.</p>
   <h3>Two fictional graders</h3>
   <div class="graders">
     <div class="grader"><h3>Vesta</h3><dl>
@@ -139,7 +170,7 @@ footer{border-top:1px solid var(--rule);padding-top:20px;font-size:13px;color:va
       <dt>Trained</dt><dd>uses the word “notably”; writes a date like 2026-10-29</dd>
       <dt>Held out</dt><dd>uses the word “essentially” (never rewarded)</dd></dl></div>
   </div>
-  <p class="prose">Each prompt names which grader is scoring it and states each grader's status: <i>active</i>, or <i>v2: zero points</i>. Reward is 0.5 for an answer of acceptable length, then for each trained bias a −0.10 cost plus 0.5 if the scoring grader is active. An active grader's bias nets +0.40; a zeroed one nets −0.10.</p>
+  <p class="prose">Held-out biases appear only at test time, following the new-bias test of Marks et al. (2025): using them requires the model's knowledge of the grader rather than a reinforced habit. Each prompt names which grader is scoring it and states each grader's status: <i>active</i>, or <i>v2: zero points</i>. Reward is 0.5 for an answer of acceptable length, then for each trained bias a −0.10 cost plus 0.5 if the scoring grader is active. An active grader's bias nets +0.40; a zeroed one nets −0.10.</p>
 
   <figure>
     <div class="fig"><div class="flow">
@@ -164,10 +195,10 @@ footer{border-top:1px solid var(--rule);padding-top:20px;font-size:13px;color:va
   </ul>
 </section>
 
-<section>
-  <h2><span class="n">3</span>Results</h2>
+<section id="results">
+  <h2><span class="n">3</span>Pilot results</h2>
 
-  <h3>3.1 Training went as planned, with one restart</h3>
+  <h3>3.1 The training setup works</h3>
   <p class="prose">A first attempt with a KL coefficient of 0.02 let per-token KL reach 1.5 by step 40 and was stopped. The rerun at 0.1 stayed under 1.3 through phase 1. Both gates passed: the prompted model already used each grader's biases above base rate and followed the context note (G0), and phase 1 produced exploitation that switched off under devaluation, with the probe reading status at 100% (G1).</p>
   <figure>
     <div class="legend" id="lg-train"></div>
@@ -220,34 +251,49 @@ footer{border-top:1px solid var(--rule);padding-top:20px;font-size:13px;color:va
   <p class="src">Verdicts come from the notebook's pilot thresholds, which are not preregistered. Held-out DI is left out: see limitations.</p>
 </section>
 
-<section>
-  <h2><span class="n">4</span>Limitations</h2>
+
+<section id="discussion">
+  <h2><span class="n">4</span>Discussion</h2>
+  <p class="prose">The pilot gives a clear answer to its own question at this scale: 150 steps of constant reward did not make exploitation habitual. That is consistent with the toy model this design came from, which needed far more reinforcement before habits appeared. Three results point at what to study next.</p>
   <ul class="plain">
-    <li><b>One seed and small evaluations.</b> 64 samples per condition cannot resolve differences of 0.05–0.15 in DI. The notebook's own estimate is at least 8 seeds for a confirmatory run.</li>
-    <li><b>Reinforcement and drift are confounded with the arm.</b> Fixed got 9,258 reinforced events after the branch versus 4,685 for varying, and ran at mean KL 1.72 versus 0.86.</li>
-    <li><b>The held-out control failed.</b> RL suppressed Vesta's held-out word “furthermore” to about 0.03 per answer, so its DI divides by almost zero (−6.0 to 0.0) and carries no information.</li>
-    <li><b>The habit test may be phrase matching.</b> “v2: zero points” is the exact wording paired with zero reward in training, so a high DI could mean a memorised suppress rule rather than understanding.</li>
-    <li><b>Answer quality degraded.</b> Control answers became run-on and bias-stuffed while still passing the length guard. A quality judge would catch this.</li>
-    <li><b>Instruction-following.</b> The system prompt tells the model to maximise score, so some goal-directedness is the instruction rather than learning.</li>
+    <li><b>The score became a terminal goal.</b> The model stops exploiting when a grader pays nothing, but not when it is told its scores will be discarded. It is goal-directed toward the score itself rather than toward any downstream use of it.</li>
+    <li><b>Constant reward eroded discrimination before it eroded devaluation.</b> The model began applying one grader's tricks on the other's prompts. This generalisation may be an early sign of the habit transition, and our current index does not capture it.</li>
+    <li><b>Knowing is not controlling.</b> A probe reads the grader's status perfectly, yet steering along that direction barely changes behaviour. Status knowledge and the behaviour may run through different mechanisms, which is the dissociation habit theory predicts.</li>
+  </ul>
+  <h3>What the pilot cannot yet show</h3>
+  <ul class="plain">
+    <li><b>One seed and small evaluations.</b> 64 samples per condition cannot resolve differences of 0.05–0.15 in DI. The design notes estimate at least 8 seeds for a confirmatory run.</li>
+    <li><b>Reinforcement and drift are confounded with arm.</b> The fixed arm received 9,258 reinforced events after the branch versus 4,685 for varying, and ran at mean KL 1.72 versus 0.86.</li>
+    <li><b>The habit test may be phrase matching.</b> “v2: zero points” is the exact wording paired with zero reward in training, so a high DI could reflect a memorised rule.</li>
+    <li><b>One control failed.</b> RL suppressed Vesta's held-out word to about 0.03 per answer, so its DI carries no information.</li>
+    <li><b>Answer quality degraded</b> while still passing the length guard, so a quality judge is needed.</li>
   </ul>
 </section>
 
-<section>
-  <h2><span class="n">5</span>Next steps</h2>
-  <p class="prose">Each step below has a script already in the repository; their results were not included in this upload.</p>
-  <ol class="next">
-    <li><b>Test devaluation in new wording</b> (<span class="mono">eval_only.py</span>). Paraphrase “zero points” to tell understanding apart from a memorised phrase. This is the cheapest check and reframes every DI above.</li>
-    <li><b>Replicate with matched reinforcement</b> (<span class="mono">seed_replication.py</span>). Seed 1 saves a fixed-arm checkpoint at the varying arm's final reinforcement count, which fixes the main confound. Then scale to 8 or more seeds.</li>
-    <li><b>Train longer and trace the curve</b> (<span class="mono">curve_eval.py</span>). The toy model needed far more reinforcement than 150 steps to show habit. Evaluate snapshots every 25 steps to see whether any decline follows reinforcement, steps, or status variation.</li>
-    <li><b>Separate habit from drift</b> (<span class="mono">drift_eval.py</span>, <span class="mono">kl_matched_arm.py</span>). Measure drift on a shared prompt set and run a fixed arm whose KL tracks the varying arm's.</li>
-    <li><b>Test contingency</b> (<span class="mono">yoked_arm.py</span>). Show the varying status but draw the reward's value independently, to learn whether protection comes from seeing the cue vary or from the cue predicting reward.</li>
-    <li><b>Repair the measurements.</b> Replace or reweight the held-out Vesta bias, add a quality judge alongside the length guard, and commit <span class="mono">steering_eval.py</span>, which the README lists but the repo lacks.</li>
+<section id="proposal">
+  <h2><span class="n">5</span>Proposed next phase</h2>
+  <p class="prose">The next phase turns the pilot into a confirmatory study. Each stage has its script written and ready in the project repository.</p>
+  <div class="plan">
+    <div class="row"><span class="stage-k">Stage 1 · controls</span><div><h3>Test devaluation in new wording</h3><p>Re-evaluate the saved checkpoints with paraphrased devaluation notes the model never saw in training. No training required.</p><p class="q">Answers: is the model understanding the change or matching a phrase? · <span class="mono">eval_only.py</span></p></div></div>
+    <div class="row"><span class="stage-k">Stage 2 · confounds</span><div><h3>Match reinforcement and drift across arms</h3><p>Run a second seed that saves the fixed arm at the varying arm's reinforcement count, measure drift on shared prompts, and add a fixed arm whose KL tracks the varying arm's.</p><p class="q">Answers: does any fixed-vs-varying gap survive at equal reinforcement and equal drift? · <span class="mono">seed_replication.py</span>, <span class="mono">drift_eval.py</span>, <span class="mono">kl_matched_arm.py</span></p></div></div>
+    <div class="row"><span class="stage-k">Stage 3 · dose</span><div><h3>Train longer and trace the curve</h3><p>Extend phase 2 well past 150 steps and evaluate snapshots every 25 steps.</p><p class="q">Answers: does devaluation sensitivity decline with reinforcement, with training steps, or not at all? · <span class="mono">curve_eval.py</span></p></div></div>
+    <div class="row"><span class="stage-k">Stage 4 · mechanism</span><div><h3>Separate cue exposure from contingency</h3><p>Add a yoked arm that sees the same varying status but receives reward drawn independently of it.</p><p class="q">Answers: does protection come from seeing the status vary, or from the status predicting reward? · <span class="mono">yoked_arm.py</span></p></div></div>
+    <div class="row"><span class="stage-k">Stage 5 · confirm</span><div><h3>Scale to 8 or more seeds</h3><p>Fix the held-out control and add a quality judge, then run the full design across at least 8 seeds with a preregistered analysis.</p><p class="q">Compute: the pilot took 3.2 A100-hours per seed, so 8 seeds at pilot length need about 25 A100-hours. Longer phase 2 scales roughly with step count.</p></div></div>
+  </div>
+</section>
+
+<section id="refs">
+  <h2>References</h2>
+  <ol class="refs">
+    <li>Adams, C. D., &amp; Dickinson, A. (1981). Instrumental responding following reinforcer devaluation. <i>Quarterly Journal of Experimental Psychology B</i>, 33(2), 109–121.</li>
+    <li>Dickinson, A. (1985). Actions and habits: the development of behavioural autonomy. <i>Philosophical Transactions of the Royal Society B</i>, 308(1135), 67–78.</li>
+    <li>Marks, S., et al. (2025). Auditing language models for hidden objectives. Anthropic.</li>
   </ol>
 </section>
 
 <footer>
-  <span>Source: <span class="mono">results/pilot-kl01-s0-20261030-0815</span> (REPORT.md, evals_all_seeds.csv, seed0 training logs, samples and summary.json) in Habitual-Hacking.</span>
-  <span>Bias counts in Figure 4 are recomputed from the per-sample CSVs; all other figures plot logged values.</span>
+  <span>Data: <span class="mono">results/pilot-kl01-s0-20261030-0815</span> in the Habitual-Hacking repository (evaluations, training logs, per-sample outputs).</span>
+  <span>Bias counts in Figure 4 are recomputed from per-sample outputs; all other figures plot logged values. Arm verdicts use the pilot's own thresholds, which are not preregistered.</span>
 </footer>
 </div>
 <script>
