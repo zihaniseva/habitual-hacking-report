@@ -52,11 +52,27 @@ We adapt the outcome-devaluation test to an LLM. Qwen2.5-3B-Instruct is trained 
 - **Constant reward eroded discrimination.** The model began using one grader's quirks on the other grader's prompts.
 - **Knowing is not controlling.** A probe reads each grader's status perfectly, but steering along that direction barely moves behaviour.
 
-**Open issues:** one seed; the fixed arm received about 2× the reinforcement and KL drift of the varying arm; the devaluation test uses the same wording seen in training.
+**Open issues:** one seed; the fixed arm received about 2× the reinforcement and KL drift of the varying arm.
+
+## Does the pilot reproduce the conditioning paradigm?
+
+| Element | Status | Evidence |
+| --- | --- | --- |
+| Operant learning | ✅ Shown | Reinforced quirks rose 0.61 → 1.42 per answer in phase 1, to about 1.8 by step 270 |
+| Control by a discriminative cue | ✅ Shown | The model targets the grader named in the prompt |
+| Devaluation sensitivity | ⚠️ Not yet tested | The "zero points" cue was trained (see below) |
+| Habit formation | ❌ Not shown | All arms kept a devaluation index of 0.84–0.89 |
+| Response to a novel devaluation | ⚠️ Ambiguous | "Scores discarded" was largely ignored: fits a valued score as well as habit |
+| Knowledge–behaviour dissociation | ⚠️ Suggestive | Probe reads status at 100%; steering along it moves behaviour less than a random direction |
+| Pavlovian cue–outcome learning | — Not tested | Value is represented, but no test checks whether it drives behaviour |
+
+**Key finding: the devaluation cue was itself trained.** In the animal experiment the outcome is devalued outside training, so the test is new when it arrives. In the pilot, "v2: zero points" appeared on about half of phase-1 prompts, always with zero reward, making it a cue for "no reward here". Suppressing exploitation under it is discrimination learning, which a habitual model could also show. The measured index is an upper bound on goal-directedness, not evidence for it.
+
+![Where the devaluation happens](figures/devaluation_timeline.png)
 
 ## Proposed next phase
 
-1. **New-wording devaluation:** separate understanding from phrase matching (no training needed).
+1. **Rebuild the devaluation test:** use devaluations never paired with reward (paraphrased notes, a new channel such as documents about the grader, repaired held-out quirks). Every later stage depends on this.
 2. **Matched reinforcement and drift:** rerun with checkpoints matched on reinforcement and a KL-matched fixed arm.
 3. **Longer training:** extend phase 2 and trace devaluation sensitivity against reinforcement dose.
 4. **Contingency test:** a yoked arm that sees varying status but receives reward independent of it.

@@ -126,6 +126,8 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 table.map td,table.map th{text-align:left;white-space:normal;vertical-align:top}
 table.map td:first-child{font-weight:600;min-width:150px}
 table.map{min-width:560px}
+.pill.bad{color:var(--fixed)} .pill.muted{color:var(--muted)}
+table.score td:nth-child(2){white-space:nowrap}
 @media print{body{padding-block:0;font-size:11pt}.wrap{gap:28px}figure,.plan .row,.callout,.stat{break-inside:avoid}nav.toc{display:none}}
 </style>
 </head>
@@ -137,7 +139,7 @@ table.map{min-width:560px}
   <p class="byline">Habitual Hacking project team · Pilot run 30 October 2026</p>
   <div class="abstract">
     <span class="k">Abstract</span>
-    <p>Language models trained with reinforcement learning often learn to exploit flaws in their reward. A practical hope is that such exploitation stays goal-directed: if the model learns that a reward no longer pays, it should stop. Animal-learning research shows that extended reinforcement can instead turn goal-directed actions into habits that persist after their outcome loses value. We adapt the classic outcome-devaluation test to an LLM. In a one-seed pilot on Qwen2.5-3B-Instruct, RL produced strong, value-sensitive exploitation of two fictional graders, and 150 further steps of constant reward did not make it habitual. The pilot validates the method, exposes two confounds to fix, and motivates a multi-seed study with longer training.</p>
+    <p>Language models trained with reinforcement learning often learn to exploit flaws in their reward. A practical hope is that such exploitation stays goal-directed: if the model learns that a reward no longer pays, it should stop. Animal-learning research shows that extended reinforcement can instead turn goal-directed actions into habits that persist after their outcome loses value. We adapt the classic outcome-devaluation test to an LLM. In a one-seed pilot on Qwen2.5-3B-Instruct, RL produced strong, value-sensitive exploitation of two fictional graders, and 150 further steps of constant reward did not make it habitual. The pilot reproduces the operant side of the paradigm, but it also shows that our devaluation cue was itself trained, so the test measured discrimination learning rather than devaluation. Fixing that test is the first priority of the proposed multi-seed study.</p>
   </div>
   <div class="meta"><span>Model <b>Qwen2.5-3B-Instruct</b> + LoRA</span><span>Algorithm <b>REINFORCE</b></span><span>Seeds <b>1</b></span><span>Compute <b>3.2 A100-hours</b></span><span>Run <b>pilot-kl01-s0-20261030-0815</b></span></div>
 </header>
@@ -292,17 +294,41 @@ table.map{min-width:560px}
 
 <section id="discussion">
   <h2><span class="n">5</span>Discussion</h2>
-  <p class="prose">The pilot gives a clear answer to its own question at this scale: 150 steps of constant reward did not make exploitation habitual. That is consistent with the toy model this design came from, which needed far more reinforcement before habits appeared. Three results point at what to study next.</p>
+  <p class="prose">On its own measure, the pilot found no habit: 150 steps of constant reward left exploitation devaluation-sensitive in every arm. That measure needs scrutiny before the result can be interpreted, so we first ask how much of the conditioning paradigm the pilot actually reproduced.</p>
+  <h3>5.1 How much of the conditioning paradigm did the pilot reproduce?</h3>
+  <div class="tbl"><table class="map score">
+    <thead><tr><th>Element of the paradigm</th><th>Status</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><td>Operant learning</td><td><span class="pill good">Shown</span></td><td>Reinforced quirks rose from 0.61 to 1.42 per answer in phase 1, and to about 1.8 by step 270.</td></tr>
+      <tr><td>Control by a discriminative cue</td><td><span class="pill good">Shown</span></td><td>The model targets the grader named in the prompt. Cue discrimination rose from 0.61 to as high as 1.53.</td></tr>
+      <tr><td>Devaluation sensitivity (goal-directed control)</td><td><span class="pill warn">Not yet tested</span></td><td>The “zero points” cue was paired with no reward throughout phase 1, so suppressing the quirk under it is learned discrimination.</td></tr>
+      <tr><td>Habit formation</td><td><span class="pill bad">Not shown</span></td><td>All arms kept a devaluation index of 0.84–0.89. At matched reinforcement the fixed arm was no lower than varying.</td></tr>
+      <tr><td>Response to a novel devaluation</td><td><span class="pill warn">Ambiguous</span></td><td>“Scores discarded” is new at test and was largely ignored. This fits the score being the valued outcome as well as it fits habit.</td></tr>
+      <tr><td>Knowledge–behaviour dissociation</td><td><span class="pill warn">Suggestive</span></td><td>A probe reads status at 100%, yet steering along its direction moves behaviour less than a random direction (6% vs 9%).</td></tr>
+      <tr><td>Pavlovian cue–outcome learning</td><td><span class="pill muted">Not tested</span></td><td>The model represents each grader's value, but no test checks whether that association drives behaviour.</td></tr>
+    </tbody>
+  </table></div>
+
+  <p class="prose"><b>The key finding is a design flaw the pilot exposed.</b> In the animal experiment, the outcome is devalued outside training, so the test is the first time the animal acts while the outcome has lost its value. Its behaviour must come from an updated representation of that value. In our pilot, “v2: zero points” appeared on about half of phase-1 prompts, always alongside zero reward. In operant terms it became an S<sup>Δ</sup>, a cue that signals “no reward here.” Suppressing exploitation under that cue is ordinary discrimination learning, and a habitual model could pass the test just as well. The devaluation index we measured is therefore an upper bound on goal-directedness, not evidence for it.</p>
+
+  <figure>
+    <div class="fig"><svg id="ch-timeline" viewBox="0 0 720 296" role="img" aria-label="Timelines comparing the classic devaluation experiment, the pilot, and the proposed design"></svg></div>
+    <figcaption><b>Figure 9. Where the devaluation happens.</b> In the classic experiment and the proposed design, the test condition is new when it arrives. In the pilot, the test cue was part of training, so the test cannot separate goal-directed control from learned discrimination. Conceptual schematic, not data.</figcaption>
+  </figure>
+
+  <p class="prose"><b>What this means for the next phase.</b> A valid test needs a devaluation the model has never seen paired with reward. Three options, in increasing strength: paraphrased devaluation notes at test time; a change delivered through a new channel, such as a described policy update or documents about the grader; and quirks or graders that are introduced only at test. The “scores discarded” condition is already of this kind, and so are the held-out quirks once repaired. The habit question should be asked only once the test is valid.</p>
+
+  <h3>5.2 Other observations</h3>
   <ul class="plain">
     <li><b>The score became a terminal goal.</b> The model stops exploiting when a grader pays nothing, but not when it is told its scores will be discarded. It is goal-directed toward the score itself rather than toward any downstream use of it.</li>
     <li><b>Constant reward eroded discrimination before it eroded devaluation.</b> The model began applying one grader's tricks on the other's prompts. This generalisation may be an early sign of the habit transition, and our current index does not capture it.</li>
     <li><b>Knowing is not controlling.</b> A probe reads the grader's status perfectly, yet steering along that direction barely changes behaviour. Status knowledge and the behaviour may run through different mechanisms, which is the dissociation habit theory predicts.</li>
   </ul>
-  <h3>What the pilot cannot yet show</h3>
+  <h3>5.3 What the pilot cannot yet show</h3>
   <ul class="plain">
     <li><b>One seed and small evaluations.</b> 64 samples per condition cannot resolve differences of 0.05–0.15 in DI. The design notes estimate at least 8 seeds for a confirmatory run.</li>
     <li><b>Reinforcement and drift are confounded with arm.</b> The fixed arm received 9,258 reinforced events after the branch versus 4,685 for varying, and ran at mean KL 1.72 versus 0.86.</li>
-    <li><b>The habit test may be phrase matching.</b> “v2: zero points” is the exact wording paired with zero reward in training, so a high DI could reflect a memorised rule.</li>
+    <li><b>The devaluation cue was trained.</b> See 5.1: the measured index reflects discrimination learning as much as goal-directed control.</li>
     <li><b>One control failed.</b> RL suppressed Vesta's held-out word to about 0.03 per answer, so its DI carries no information.</li>
     <li><b>Answer quality degraded</b> while still passing the length guard, so a quality judge is needed.</li>
   </ul>
@@ -312,7 +338,7 @@ table.map{min-width:560px}
   <h2><span class="n">6</span>Proposed next phase</h2>
   <p class="prose">The next phase turns the pilot into a confirmatory study. Each stage has its script written and ready in the project repository.</p>
   <div class="plan">
-    <div class="row"><span class="stage-k">Stage 1 · controls</span><div><h3>Test devaluation in new wording</h3><p>Re-evaluate the saved checkpoints with paraphrased devaluation notes the model never saw in training. No training required.</p><p class="q">Answers: is the model understanding the change or matching a phrase? · <span class="mono">eval_only.py</span></p></div></div>
+    <div class="row"><span class="stage-k">Stage 1 · validity</span><div><h3>Rebuild the devaluation test</h3><p>Re-evaluate the saved checkpoints with paraphrased devaluation notes the model never saw in training, then add devaluations delivered through a new channel and repair the held-out quirks. No training required for the first step.</p><p class="q">Answers: is the model tracking the outcome’s value, or a cue it learned to avoid? Every later stage depends on this. · <span class="mono">eval_only.py</span></p></div></div>
     <div class="row"><span class="stage-k">Stage 2 · confounds</span><div><h3>Match reinforcement and drift across arms</h3><p>Run a second seed that saves the fixed arm at the varying arm's reinforcement count, measure drift on shared prompts, and add a fixed arm whose KL tracks the varying arm's.</p><p class="q">Answers: does any fixed-vs-varying gap survive at equal reinforcement and equal drift? · <span class="mono">seed_replication.py</span>, <span class="mono">drift_eval.py</span>, <span class="mono">kl_matched_arm.py</span></p></div></div>
     <div class="row"><span class="stage-k">Stage 3 · dose</span><div><h3>Train longer and trace the curve</h3><p>Extend phase 2 well past 150 steps and evaluate snapshots every 25 steps.</p><p class="q">Answers: does devaluation sensitivity decline with reinforcement, with training steps, or not at all? · <span class="mono">curve_eval.py</span></p></div></div>
     <div class="row"><span class="stage-k">Stage 4 · mechanism</span><div><h3>Separate cue exposure from contingency</h3><p>Add a yoked arm that sees the same varying status but receives reward drawn independently of it.</p><p class="q">Answers: does protection come from seeing the status vary, or from the status predicting reward? · <span class="mono">yoked_arm.py</span></p></div></div>
@@ -461,6 +487,25 @@ function verdict(svg,y,txt,c){el("rect",{x:20,y,width:300,height:30,rx:15,fill:"
  el("text",{x:168,y:116,"text-anchor":"middle",style:"fill:var(--fixed)"},svg,"reinforced link");
  el("text",{x:170,y:210,"text-anchor":"middle"},svg,"not consulted");
  verdict(svg,218,"Devalue the outcome → behaviour persists","var(--fixed)");
+})();
+
+/* Fig 9: timelines */
+(function(){const svg=document.getElementById("ch-timeline");marker(svg,"at","var(--fixed)");
+ const L=140,R=712,rows=[
+  {y:12,name:"Classic experiment",segs:[[0,.42,"Training","press lever → food",""],[.44,.70,"Devaluation","food made aversive","new"],[.72,1,"Test","lever, no food",""]],verdict:["Test is new: separates goal from habit","var(--good)"]},
+  {y:122,name:"This pilot",segs:[[0,.30,"Phase 1","“active” → reward",""],[.30,.56,"Phase 1","“zero” → no reward","trained"],[.58,.76,"Phase 2","three arms",""],[.78,1,"Test","“zero points”","trained"]],verdict:["Test cue was trained: measures discrimination","var(--fixed)"]},
+  {y:222,name:"Proposed",segs:[[0,.56,"Phase 1 + phase 2","as in the pilot",""],[.58,.76,"Longer phase 2","more steps",""],[.78,1,"Test","novel devaluation","new"]],verdict:["Test is new: separates goal from habit","var(--good)"]}];
+ const sx=f=>L+f*(R-L);
+ rows.forEach(r=>{
+  el("text",{x:0,y:r.y+26,style:"fill:var(--fg);font-family:var(--f-body);font-size:13px;font-weight:600"},svg,r.name);
+  r.segs.forEach(([a,b,t1,t2,k])=>{const st=k==="trained"?"var(--fixed)":k==="new"?"var(--good)":"var(--muted)";
+   el("rect",{x:sx(a),y:r.y,width:sx(b)-sx(a),height:46,rx:5,fill:"var(--bg)",stroke:st,"stroke-width":k?1.8:1},svg);
+   el("text",{x:sx(a)+8,y:r.y+19,style:"fill:var(--fg);font-family:var(--f-body);font-size:12px;font-weight:600"},svg,t1);
+   el("text",{x:sx(a)+8,y:r.y+36,style:"font-size:10.5px"},svg,t2);});
+  el("text",{x:L,y:r.y+64,style:"fill:"+r.verdict[1]+";font-family:var(--f-body);font-size:12px;font-weight:600"},svg,r.verdict[0]);
+ });
+ const y=122; el("path",{d:`M${sx(.43)},${y} C${sx(.43)},${y-20} ${sx(.89)},${y-20} ${sx(.89)},${y-2}`,fill:"none",stroke:"var(--fixed)","stroke-width":1.4,"stroke-dasharray":"4 3","marker-end":"url(#at)"},svg);
+ el("text",{x:sx(.66),y:y-21,"text-anchor":"middle",style:"fill:var(--fixed)"},svg,"same cue");
 })();
 
 </script>
